@@ -177,7 +177,7 @@ export function PlatformScreen() {
               }}
               className="rounded-chip border border-line bg-white/85 px-3 py-1.5 font-semibold text-ink-soft backdrop-blur-sm transition hover:bg-white"
             >
-              나가기
+              시작 화면으로
             </button>
           </div>
         </header>
