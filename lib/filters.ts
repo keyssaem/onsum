@@ -48,12 +48,8 @@ export function isPristine(f: FilterState): boolean {
   );
 }
 
-const TOPIC_ORDER = new Map<TopicKey, number>(
-  TOPICS.map((t, i) => [t.key, i] as const),
-);
-
 /**
- * 정렬.
+ * 정렬. (정렬 옵션은 최신순·이름순 2가지 — 2026-08-13 연번순 제외)
  * 발행연도가 "2020~2024" 같은 구간 문자열이라 숫자로 비교할 수 없어,
  * 파싱 단계에서 매겨둔 yearRank(2025~=3, 2020~2024=2, 2015~2019=1)를 씁니다.
  */
@@ -61,12 +57,6 @@ export function sortResources(list: Resource[], sort: SortKey): Resource[] {
   const sorted = [...list];
   if (sort === "title") {
     sorted.sort((a, b) => a.title.localeCompare(b.title, "ko"));
-  } else if (sort === "no") {
-    sorted.sort(
-      (a, b) =>
-        (TOPIC_ORDER.get(a.topic) ?? 0) - (TOPIC_ORDER.get(b.topic) ?? 0) ||
-        a.order - b.order,
-    );
   } else {
     // 최신순: 발행연도 구간이 최근일수록 앞, 같으면 시트에서 나중에 적힌 것이 앞
     sorted.sort((a, b) => b.yearRank - a.yearRank || b.order - a.order);
