@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   함께 온(溫)숨 디자인 토큰
+   민들레 일러스트(하늘 · 풀밭 · 민들레 · 토끼)에서 추출한 색을 사용합니다.
+   Tailwind 유틸리티로 bg-sky-400 / text-ink / border-dande-300 처럼 씁니다.
+------------------------------------------------------------------- */
+@theme {
+  --font-sans: "Pretendard Variable", "Apple SD Gothic Neo", "Malgun Gothic",
+    system-ui, sans-serif;
+
+  /* 하늘 (메인 컬러) */
+  --color-sky-50: #f3fbff;
+  --color-sky-100: #e0f4fd;
+  --color-sky-200: #c2e9fa;
+  --color-sky-300: #97dbf6;
+  --color-sky-400: #6ec3ee;
+  --color-sky-500: #47a8dd;
+  --color-sky-600: #2e8fc4;
+  --color-sky-700: #22719d;
+
+  /* 풀밭 */
+  --color-leaf-50: #f4fbea;
+  --color-leaf-100: #e6f5d0;
+  --color-leaf-200: #cfeaa8;
+  --color-leaf-300: #b4de7d;
+  --color-leaf-400: #9ed75b;
+  --color-leaf-500: #7cbb3c;
+  --color-leaf-600: #5e9a2e;
+  --color-leaf-700: #487a24;
+
+  /* 민들레 (강조 · 포인트) */
+  --color-dande-50: #fffbeb;
+  --color-dande-100: #fff3c9;
+  --color-dande-200: #ffe795;
+  --color-dande-300: #ffdc6a;
+  --color-dande-400: #ffd54a;
+  --color-dande-500: #f5c01f;
+  --color-dande-600: #e0a400;
+  --color-dande-700: #b58200;
+
+  /* 토끼 (보조 · 따뜻함) */
+  --color-blossom-50: #fef6f8;
+  --color-blossom-100: #fdebf0;
+  --color-blossom-200: #fbd8e2;
+  --color-blossom-300: #f9c6d5;
+  --color-blossom-400: #f2a8be;
+  --color-blossom-500: #e88aa5;
+
+  /* 텍스트 · 배경 */
+  --color-ink: #2f3a34;
+  --color-ink-soft: #63736b;
+  --color-ink-faint: #96a29b;
+  --color-paper: #fbfbf7;
+  --color-line: #e4e8e2;
+
+  /* 형광펜(목업의 하늘색 하이라이트) */
+  --color-marker: #bfe6fb;
+
+  --radius-card: 1rem;
+  --radius-chip: 999px;
+
+  --animate-seed-drift: seed-drift 20s linear infinite;
+  --animate-nudge: nudge 2s ease-in-out infinite;
+}
+
+/* 민들레 씨앗이 위로 흩날리는 움직임 */
+@keyframes seed-drift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate3d(70px, -140px, 0) rotate(90deg);
+  }
+  88% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate3d(160px, -300px, 0) rotate(200deg);
+    opacity: 0;
+  }
+}
+
+/* 아래로 스크롤하라는 화살표의 작은 움직임 */
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    word-break: keep-all; /* 한글 단어 중간 줄바꿈 방지 */
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-marker);
+    color: var(--color-ink);
+  }
+
+  /* 키보드 사용자를 위한 포커스 링 (접근성) */
+  :focus-visible {
+    outline: 3px solid var(--color-sky-500);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* 목업의 하늘색 형광펜 밑줄 효과 */
+  .marker-hl {
+    background: linear-gradient(
+      transparent 55%,
+      var(--color-marker) 55%,
+      var(--color-marker) 95%,
+      transparent 95%
+    );
+  }
+
+  /* 배경 일러스트 위에 얹는 글자의 가독성 확보용 */
+  .text-shadow-soft {
+    text-shadow: 0 2px 12px rgb(255 255 255 / 0.85),
+      0 1px 3px rgb(255 255 255 / 0.9);
+  }
+}
+
+/* 움직임을 줄이도록 설정한 사용자 존중 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

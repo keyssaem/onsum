@@ -1,0 +1,59 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # GitHub 웹에서 수동 실행 가능
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포가 겹치지 않도록 하나씩만 실행
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # 구글 시트 예비 사본을 배포 시점 기준으로 갱신합니다.
+      # 실패해도 배포는 계속 진행합니다(직전 사본이 그대로 남음).
+      - name: Refresh sheet snapshot
+        run: npm run sync:snapshot
+        continue-on-error: true
+
+      - name: Build (static export)
+        env:
+          # 저장소 페이지(아이디.github.io/저장소명)로 배포되므로 basePath가 필요합니다.
+          # 커스텀 도메인이나 사용자 페이지로 옮기면 이 줄을 빈 값으로 바꾸세요.
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
