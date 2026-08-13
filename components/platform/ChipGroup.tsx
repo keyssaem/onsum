@@ -19,8 +19,12 @@ export function ChipGroup<K extends string>({
 }: Props<K>) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <span className="marker-hl w-[4.5rem] shrink-0 text-sm font-bold md:text-base">
-        {label}
+      {/*
+        바깥 span은 칩 줄맞춤용 고정 폭,
+        형광펜은 안쪽 span에만 걸어 글자 폭만큼만 칠해지게 합니다.
+      */}
+      <span className="w-[4.5rem] shrink-0 text-sm font-bold md:text-base">
+        <span className="marker-hl">{label}</span>
       </span>
       {options.map((opt) => {
         const on = selected.includes(opt.key);

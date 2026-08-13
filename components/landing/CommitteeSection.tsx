@@ -14,8 +14,8 @@ export function CommitteeSection() {
         <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {COMMITTEE.map((group) => (
             <div key={group.group}>
-              <h3 className="marker-hl inline-block text-base font-bold">
-                {group.group}
+              <h3 className="text-base font-bold">
+                <span className="marker-hl">{group.group}</span>
               </h3>
               <ul className="mt-3 space-y-1.5 text-sm leading-relaxed">
                 {group.members.map((m) => (

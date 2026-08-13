@@ -152,8 +152,9 @@ export function PlatformScreen() {
         */}
         <header className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="marker-hl inline-block text-lg font-bold sm:text-xl md:text-2xl">
-              학생 상담지원 플랫폼 [함께 온(溫)숨]
+            {/* 형광펜은 안쪽 inline span에만 걸어 글자 폭만큼 칠해지게 합니다 */}
+            <h1 className="text-lg font-bold sm:text-xl md:text-2xl">
+              <span className="marker-hl">학생 상담지원 플랫폼 [함께 온(溫)숨]</span>
             </h1>
             {/* block + w-fit: 제목과 같은 줄에 붙지 않고 항상 제목 아래에 놓입니다 */}
             <div className="mt-3 block w-fit rounded-lg bg-white/85 px-4 py-2.5 text-xs leading-relaxed backdrop-blur-sm md:text-sm">
@@ -186,8 +187,8 @@ export function PlatformScreen() {
           {/* ------------------------------ 검색 기준 */}
           <section aria-label="검색 기준">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="marker-hl inline-block text-lg font-bold">
-                검색 기준
+              <h2 className="text-lg font-bold">
+                <span className="marker-hl">검색 기준</span>
               </h2>
               {/*
                 좁은 화면에서는 필터가 세로로 길어져 결과를 보려면 한참 내려야 합니다.
@@ -272,8 +273,10 @@ export function PlatformScreen() {
           {/* ------------------------------ 결과 */}
           <section aria-label="자료 목록" aria-live="polite">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="marker-hl inline-block text-lg font-bold">
-                {pristine ? "자료 목록" : "검색 결과"}
+              <h2 className="text-lg font-bold">
+                <span className="marker-hl">
+                  {pristine ? "자료 목록" : "검색 결과"}
+                </span>
               </h2>
               {!pristine && !loading && !selected && (
                 <div className="flex items-center gap-3">

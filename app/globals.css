@@ -126,14 +126,22 @@
 }
 
 @layer utilities {
-  /* 목업의 하늘색 형광펜 밑줄 효과 */
+  /*
+    목업의 하늘색 형광펜 밑줄 효과.
+    inline 요소에 걸어야 글자 길이만큼만 칠해집니다(빈 여백까지 칠해지지 않게).
+    - background-size를 em으로 잡아 글자 크기에 비례한 굵기를 유지합니다.
+    - box-decoration-break: clone → 줄바꿈되면 각 줄마다 글자 폭에 맞춰 다시 칠합니다.
+  */
   .marker-hl {
-    background: linear-gradient(
-      transparent 55%,
-      var(--color-marker) 55%,
-      var(--color-marker) 95%,
-      transparent 95%
+    background-image: linear-gradient(
+      var(--color-marker),
+      var(--color-marker)
     );
+    background-repeat: no-repeat;
+    background-size: 100% 0.55em; /* 글자 크기에 비례한 형광펜 굵기 */
+    background-position: 0 100%; /* 글줄 아래쪽에 걸치도록 */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
   /* 배경 일러스트 위에 얹는 글자의 가독성 확보용 */
