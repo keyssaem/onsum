@@ -34,7 +34,8 @@ export function ChipGroup<K extends string>({
             type="button"
             aria-pressed={on}
             onClick={() => onToggle(opt.key)}
-            className={`rounded-chip border px-3 py-1.5 text-sm transition ${
+            // min-h-11(44px) = 손가락으로 누르기 편한 최소 크기
+            className={`min-h-11 rounded-chip border px-3 py-2.5 text-sm transition ${
               on
                 ? "border-dande-600 bg-dande-300 font-bold text-ink shadow-sm"
                 : "border-dande-400 bg-white/85 text-ink-soft hover:border-dande-500 hover:bg-white"

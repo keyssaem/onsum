@@ -167,7 +167,7 @@ export function PlatformScreen() {
           </div>
 
           <div className="flex shrink-0 items-center justify-end gap-2 text-xs">
-            <span className="rounded-chip bg-white/85 px-3 py-1.5 font-semibold backdrop-blur-sm">
+            <span className="rounded-chip bg-white/85 px-3 py-2.5 font-semibold backdrop-blur-sm">
               {name} 선생님
             </span>
             <button
@@ -176,7 +176,7 @@ export function PlatformScreen() {
                 clearSession();
                 router.replace("/");
               }}
-              className="rounded-chip border border-line bg-white/85 px-3 py-1.5 font-semibold text-ink-soft backdrop-blur-sm transition hover:bg-white"
+              className="rounded-chip border border-line bg-white/85 px-3 py-2.5 font-semibold text-ink-soft backdrop-blur-sm transition hover:bg-white"
             >
               시작 화면으로
             </button>
@@ -198,7 +198,7 @@ export function PlatformScreen() {
                 type="button"
                 onClick={() => setPanelOpen(!panelOpen)}
                 aria-expanded={panelOpen}
-                className="rounded-chip border border-line bg-white/85 px-3 py-1.5 text-xs font-semibold backdrop-blur-sm lg:hidden"
+                className="min-h-11 rounded-chip border border-line bg-white/85 px-3 py-2.5 text-xs font-semibold backdrop-blur-sm lg:hidden"
               >
                 {panelOpen ? "접기" : `펴기${selectedCount ? ` (${selectedCount})` : ""}`}
               </button>
@@ -254,7 +254,7 @@ export function PlatformScreen() {
                 type="button"
                 onClick={() => setFilters(EMPTY_FILTERS)}
                 disabled={pristine}
-                className="inline-flex items-center gap-1.5 rounded-chip px-3 py-1.5 text-sm font-bold text-blossom-500 transition hover:bg-blossom-50 disabled:cursor-not-allowed disabled:text-ink-faint disabled:hover:bg-transparent"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-chip px-3 py-2.5 text-sm font-bold text-blossom-500 transition hover:bg-blossom-50 disabled:cursor-not-allowed disabled:text-ink-faint disabled:hover:bg-transparent"
               >
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-4">
                   <path
@@ -295,7 +295,7 @@ export function PlatformScreen() {
                         sort: e.target.value as SortKey,
                       })
                     }
-                    className="rounded-chip border border-line bg-white px-3 py-1.5 text-sm font-semibold outline-none focus:border-sky-400"
+                    className="min-h-11 rounded-chip border border-line bg-white px-3 py-2.5 text-sm font-semibold outline-none focus:border-sky-400"
                   >
                     {SORT_OPTIONS.map((s) => (
                       <option key={s.key} value={s.key}>
@@ -392,12 +392,12 @@ export function PlatformScreen() {
                             type="button"
                             onClick={() => goPage(safePage - 1)}
                             disabled={safePage === 1}
-                            className="rounded-chip border border-line bg-white px-3.5 py-2 text-sm font-bold shadow-sm transition hover:bg-dande-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="min-h-11 rounded-chip border border-line bg-white px-3.5 py-2.5 text-sm font-bold shadow-sm transition hover:bg-dande-100 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             ◀ 이전
                           </button>
 
-                          <span className="rounded-chip bg-white/90 px-4 py-2 text-sm font-bold shadow-sm">
+                          <span className="rounded-chip bg-white/90 px-4 py-2.5 text-sm font-bold shadow-sm">
                             페이지 {safePage} / {totalPages}
                           </span>
 
@@ -405,7 +405,7 @@ export function PlatformScreen() {
                             type="button"
                             onClick={() => goPage(safePage + 1)}
                             disabled={safePage === totalPages}
-                            className="rounded-chip border border-line bg-white px-3.5 py-2 text-sm font-bold shadow-sm transition hover:bg-dande-100 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="min-h-11 rounded-chip border border-line bg-white px-3.5 py-2.5 text-sm font-bold shadow-sm transition hover:bg-dande-100 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             다음 ▶
                           </button>

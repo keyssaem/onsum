@@ -93,7 +93,7 @@ export function SearchBar({
         id="search-scope"
         value={scope}
         onChange={(e) => onScopeChange(e.target.value as SearchScope)}
-        className="shrink-0 rounded-chip border border-line bg-white px-4 py-2.5 text-sm font-semibold outline-none focus:border-sky-400"
+        className="min-h-11 shrink-0 rounded-chip border border-line bg-white px-4 py-2.5 text-sm font-semibold outline-none focus:border-sky-400"
       >
         {SEARCH_SCOPES.map((s) => (
           <option key={s.key} value={s.key}>
@@ -133,7 +133,7 @@ export function SearchBar({
           onBlur={flushPush}
           enterKeyHint="search"
           placeholder="자료명, 내용, 기관으로 검색"
-          className="w-full rounded-chip border border-line bg-white py-2.5 pr-11 pl-4 text-sm outline-none placeholder:text-ink-faint focus:border-sky-400"
+          className="min-h-11 w-full rounded-chip border border-line bg-white py-2.5 pr-11 pl-4 text-sm outline-none placeholder:text-ink-faint focus:border-sky-400"
         />
         <svg
           aria-hidden

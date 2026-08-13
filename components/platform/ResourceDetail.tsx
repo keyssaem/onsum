@@ -34,7 +34,7 @@ export function ResourceDetail({ resource: r, linked, onBack, onSelect }: Props)
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-1.5 rounded-chip border border-line px-3 py-1.5 text-sm font-semibold transition hover:bg-paper"
+        className="inline-flex items-center gap-1.5 rounded-chip border border-line px-3 py-2.5 text-sm font-semibold transition hover:bg-paper"
       >
         <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-4">
           <path

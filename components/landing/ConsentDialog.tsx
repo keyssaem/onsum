@@ -84,7 +84,7 @@ export function ConsentDialog({ open, onClose, onAgree }: Props) {
           <button
             ref={closeRef}
             onClick={onClose}
-            className="rounded-chip border border-line px-4 py-2 text-sm font-semibold text-ink-soft transition hover:bg-paper"
+            className="rounded-chip border border-line px-4 py-2.5 text-sm font-semibold text-ink-soft transition hover:bg-paper"
           >
             닫기
           </button>
@@ -93,7 +93,7 @@ export function ConsentDialog({ open, onClose, onAgree }: Props) {
               onAgree();
               onClose();
             }}
-            className="rounded-chip bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600"
+            className="rounded-chip bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-600"
           >
             동의하고 닫기
           </button>

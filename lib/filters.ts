@@ -64,18 +64,27 @@ export function sortResources(list: Resource[], sort: SortKey): Resource[] {
   return sorted;
 }
 
+/**
+ * 검색어 일치 판정.
+ *
+ * 띄어 쓴 단어는 **모두 들어 있어야** 결과로 칩니다(AND).
+ * 문장 그대로 찾으면 '자해 예방'처럼 두 단어를 치는 순간 0건이 되는데,
+ * 검색창에 두 단어를 넣는 것은 아주 흔한 행동입니다.
+ * 단어 순서는 따지지 않으므로 '예방 자해'로 쳐도 같은 결과가 나옵니다.
+ */
 function matchesQuery(r: Resource, query: string, scope: SearchScope): boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return true;
-  const target =
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const target = (
     scope === "title"
       ? r.title
       : scope === "summary"
         ? r.summary
         : scope === "publisher"
           ? r.publisher
-          : r.haystack;
-  return target.toLowerCase().includes(q);
+          : r.haystack
+  ).toLowerCase();
+  return words.every((word) => target.includes(word));
 }
 
 /**
