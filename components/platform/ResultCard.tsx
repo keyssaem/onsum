@@ -22,10 +22,14 @@ interface Props {
   onSelect: (id: string) => void;
 }
 
-/** 카드 아래쪽 정보 한 줄 (활용자 / 자료형태) */
+/**
+ * 카드 아래쪽 정보 한 줄 (활용자 / 자료형태).
+ * items-baseline: 라벨(작은 글자)과 값(큰 글자)의 글줄 바닥을 맞춥니다.
+ * 이게 없으면 칸 위쪽을 기준으로 붙어, 글자 크기 차이만큼 라벨이 떠 보입니다.
+ */
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-[3.4rem_1fr] gap-1.5 md:grid-cols-[4rem_1fr]">
+    <div className="grid grid-cols-[3.4rem_1fr] items-baseline gap-1.5 md:grid-cols-[4rem_1fr]">
       <dt className="text-[11px] font-bold text-ink-faint md:text-xs">
         {label}
       </dt>
