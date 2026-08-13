@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "sync:assets": "node scripts/sync-assets.mjs",
-    "sync:snapshot": "node scripts/save-snapshot.mjs"
+    "sync:snapshot": "node scripts/save-snapshot.mjs",
+    "sync:links": "node scripts/save-links.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",

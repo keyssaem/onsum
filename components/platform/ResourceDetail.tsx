@@ -24,8 +24,9 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export function ResourceDetail({ resource: r, linked, onBack, onSelect }: Props) {
-  // 시트의 자료링크 칸에 주소가 아닌 안내 문구가 적힌 행이 있어,
-  // 실제 주소(http…)일 때만 버튼으로 만들고 아니면 글자로만 보여줍니다.
+  // 실제 주소(http…)가 있을 때만 버튼으로 만듭니다.
+  // 시트 칸에 '학생생활자료실'처럼 글자로 링크가 걸려 있던 경우, 주소는
+  // links.json 에서 채워지고 그 글자는 urlLabel 로 남아 버튼 아래에 표시됩니다.
   const isLink = /^https?:\/\//i.test(r.url);
 
   return (
@@ -54,7 +55,7 @@ export function ResourceDetail({ resource: r, linked, onBack, onSelect }: Props)
       <h2 className="mt-1 text-2xl font-bold break-keep">{r.title}</h2>
 
       <dl className="mt-5">
-        {r.url && (
+        {(r.url || r.urlLabel) && (
           <Row label="자료 보기(링크)">
             {isLink ? (
               <>
@@ -62,10 +63,18 @@ export function ResourceDetail({ resource: r, linked, onBack, onSelect }: Props)
                   href={r.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-chip bg-sky-500 px-4 py-2 font-semibold text-white transition hover:bg-sky-600"
+                  className="inline-flex max-w-full items-center gap-1.5 rounded-chip bg-sky-500 px-4 py-2 text-left font-semibold text-white transition hover:bg-sky-600"
                 >
-                  자료 바로가기
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-3.5">
+                  {/* 시트에 적혀 있던 링크 글자를 그대로 버튼 이름으로 씁니다 */}
+                  <span className="min-w-0 break-keep">
+                    {r.urlLabel || "자료 바로가기"}
+                  </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                    className="size-3.5 shrink-0"
+                  >
                     <path
                       d="M7 17 17 7M9 7h8v8"
                       stroke="currentColor"
@@ -80,8 +89,8 @@ export function ResourceDetail({ resource: r, linked, onBack, onSelect }: Props)
                 </span>
               </>
             ) : (
-              // 주소가 아니라 찾아가는 경로 안내 등인 경우
-              <span>{r.url}</span>
+              // 주소를 끝내 찾지 못한 경우 — 시트에 적힌 글자만 보여줍니다
+              <span>{r.urlLabel || r.url}</span>
             )}
           </Row>
         )}

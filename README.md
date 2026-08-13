@@ -55,6 +55,12 @@ npm run sync:assets
 npm run sync:snapshot
 ```
 
+자료 링크 목록 갱신 (배포할 때 자동 실행됨)
+
+```bash
+npm run sync:links
+```
+
 ## 폴더 구조
 
 ```
@@ -72,7 +78,7 @@ components/
   DandelionSeeds.tsx  배경 장식 애니메이션
 lib/
   config.ts           시트 ID · 탭 이름 · 필터 정의  ← 운영 중 바뀌면 여기만 수정
-  sheets.ts           구글 시트 조회 · CSV 파싱 · 값 정규화
+  sheets.ts           구글 시트 조회 · CSV 파싱 · 값 정규화 · 링크 보정
   filters.ts          필터 규칙 · 주소(URL) 변환
   useResources.ts     자료 목록 세션 캐시 + 새로고침
   types.ts            자료(Resource) 타입 정의
@@ -83,7 +89,7 @@ lib/
   assets.ts           이미지 정적 import
 image/                디자인 원본 보관
 assets/images/        WebP 변환본 (빌드에 포함, sync:assets가 생성)
-public/snapshot/      구글 시트 예비 사본 (장애 대비)
+public/snapshot/      구글 시트 예비 사본 (장애 대비) · links.json (자료 링크 주소)
 supabase/schema.sql   데이터베이스 설정 (대시보드에서 1회 실행)
 docs/                 설정 가이드 · 개인정보 문서
 PLAN.md               전체 구현 계획서
@@ -104,6 +110,20 @@ PLAN.md               전체 구현 계획서
 
 - 자료명(G열)이 비어 있는 행은 사이트에 노출되지 않습니다.
 - 학교급에 `중등(중,고)`처럼 괄호 안에 쉼표가 들어가도 정상 처리됩니다.
+
+**자료링크(J열) — 글자에 링크를 걸어도 됩니다**
+
+`학생생활자료실`처럼 글자에 링크를 건 칸은, 구글이 CSV로 내보낼 때 **주소를 빼고 글자만**
+보냅니다. 그래서 배포할 때 엑셀 내보내기에서 주소만 따로 뽑아
+`public/snapshot/links.json`에 저장해 두고, 사이트에서 둘을 합쳐 씁니다
+(`npm run sync:links`, 배포 시 자동 실행).
+
+- 링크를 **새로 걸거나 바꾸면 다음 배포 후**에 사이트에 반영됩니다.
+  즉시 반영이 필요하면 주소를 글자 그대로(`https://…`) 칸에 적으면 됩니다.
+- 연번(B열)도 같은 이유로 함께 보정합니다. 구글이 연번 열을 숫자로 판단하면
+  `26-1` 같은 값을 빈칸으로 보내는데, 그러면 연계자료끼리 서로를 찾지 못합니다.
+- 반영 상태는 관리자 점검 페이지(`/check`)의 **‘자료 주소를 못 찾은 자료’**,
+  **‘연계자료 연번이 실제로 이어진 자료’** 항목으로 확인합니다.
 
 ## 크레딧
 

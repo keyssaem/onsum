@@ -90,6 +90,41 @@ export function splitMulti(value: string): string[] {
     .filter(Boolean);
 }
 
+/**
+ * 연계자료 연번의 **범위 표기**를 실제 연번 목록으로 펼칩니다.
+ *
+ *   "68-1~68-15" → ["68-1", "68-2", … "68-15"]
+ *   "12~15"      → ["12", "13", "14", "15"]
+ *
+ * 시트에 연계자료가 열댓 개씩 딸린 자료가 있어, 담당 선생님이 쉼표로 나열하는 대신
+ * 물결로 묶어 적어 두셨습니다. 그대로 두면 어떤 자료와도 이어지지 않습니다.
+ * 앞자리가 다르거나(68-1~70-2) 숫자가 아니면 손대지 않고 원문을 그대로 둡니다.
+ */
+export function expandNoRange(token: string): string[] {
+  const parts = token.split(/\s*[~〜～∼]\s*/);
+  if (parts.length !== 2) return [token];
+
+  const [from, to] = parts;
+  // "68-1" 처럼 앞자리-뒷자리 형태이거나, 그냥 숫자이거나
+  const parse = (v: string) => /^(?:(\d+)-)?(\d+)$/.exec(v);
+  const a = parse(from);
+  const b = parse(to);
+  if (!a || !b) return [token];
+
+  const prefix = a[1] ?? "";
+  // 앞자리가 서로 다르면(68-1~70-3) 무엇을 뜻하는지 알 수 없어 그대로 둡니다.
+  if (prefix !== (b[1] ?? "")) return [token];
+
+  const start = Number(a[2]);
+  const end = Number(b[2]);
+  // 거꾸로 적혔거나 지나치게 넓으면 오타로 보고 원문 유지
+  if (start > end || end - start > 200) return [token];
+
+  const out: string[] = [];
+  for (let n = start; n <= end; n++) out.push(prefix ? `${prefix}-${n}` : `${n}`);
+  return out;
+}
+
 /** 사용대상 원문 → 필터 키 */
 const AUDIENCE_LOOKUP = new Map<string, AudienceKey>(
   AUDIENCES.flatMap((a) => a.sheetValues.map((v) => [v, a.key] as const)),
@@ -145,9 +180,83 @@ function expandLevels(
    3. CSV 한 장 → Resource[]
 ------------------------------------------------------------------- */
 
+/* ------------------------------------------------------------------
+   2-1. 링크 보정 자료 (public/snapshot/links.json)
+
+   시트 칸에 '학생생활자료실' 처럼 글자로 링크를 걸면, 어떤 내보내기 형식으로도
+   주소가 실려 오지 않습니다(CSV·HTML·JSON 모두 표시 글자만 옵니다).
+   엑셀 내보내기에는 주소가 남아 있어서, 배포할 때 `npm run sync:links` 로
+   미리 뽑아 둔 목록을 여기서 합칩니다. 연번도 함께 보정합니다 —
+   gviz 는 숫자로 판단한 열의 "26-1" 같은 값을 빈칸으로 돌려주기 때문입니다.
+------------------------------------------------------------------- */
+
+export interface LinkHint {
+  /** 같은 탭에서 '자료명이 있는 행' 중 몇 번째인지 */
+  i: number;
+  no: string;
+  title: string;
+  /** 링크 칸의 표시 글자 */
+  label: string;
+  url: string;
+}
+
+interface HintLookup {
+  byIndex: LinkHint[];
+  /** 제목이 그 탭에서 유일할 때만 담습니다 (같은 제목이 여러 개면 못 고름) */
+  byTitle: Map<string, LinkHint>;
+}
+
+function buildLookup(hints: LinkHint[] = []): HintLookup {
+  const byTitle = new Map<string, LinkHint>();
+  const dup = new Set<string>();
+
+  for (const hint of hints) {
+    const key = squash(hint.title);
+    if (byTitle.has(key) || dup.has(key)) {
+      byTitle.delete(key);
+      dup.add(key);
+      continue;
+    }
+    byTitle.set(key, hint);
+  }
+  return { byIndex: hints, byTitle };
+}
+
+/**
+ * 행 순서로 먼저 찾되, **제목이 같은지 반드시 확인**합니다.
+ * 시트가 그 사이에 바뀌어 순서가 어긋났다면 제목으로 다시 찾고,
+ * 그것도 안 되면 아무것도 돌려주지 않습니다.
+ * (틀린 주소를 붙이는 것보다 링크가 없는 편이 낫습니다)
+ */
+function pickHint(
+  lookup: HintLookup,
+  index: number,
+  title: string,
+): LinkHint | undefined {
+  const byIndex = lookup.byIndex[index];
+  if (byIndex && squash(byIndex.title) === squash(title)) return byIndex;
+  return lookup.byTitle.get(squash(title));
+}
+
+async function fetchLinkHints(): Promise<Partial<Record<TopicKey, LinkHint[]>>> {
+  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  try {
+    const res = await fetch(`${base}/snapshot/links.json`, { cache: "no-store" });
+    if (!res.ok) return {};
+    const json = (await res.json()) as {
+      topics?: Partial<Record<TopicKey, LinkHint[]>>;
+    };
+    return json.topics ?? {};
+  } catch {
+    // 링크 목록을 못 읽어도 사이트는 그대로 동작해야 합니다 (주소만 비어 있게 됨)
+    return {};
+  }
+}
+
 export function parseSheet(
   csv: string,
   topic: TopicKey,
+  hints: LinkHint[] = [],
 ): { resources: Resource[]; issues: SheetIssue[] } {
   // header:false 로 읽습니다. 시트 오른쪽에 이름이 빈 열이 여러 개라
   // header:true 를 쓰면 키가 충돌합니다.
@@ -160,12 +269,32 @@ export function parseSheet(
 
   const cell = (row: string[], field: FieldKey) => (row[col[field]] ?? "").trim();
 
+  const lookup = buildLookup(hints);
+  // 링크 목록도 '자료명이 있는 행'만 세므로 별도 번호가 필요합니다.
+  let shown = 0;
+
   data.slice(1).forEach((row, i) => {
     const title = cell(row, "title");
     // 자료명이 비어 있는 행 = 아직 작성 중인 자리 → 사이트에 노출하지 않습니다.
     if (!title) return;
 
-    const no = cell(row, "no");
+    const hint = pickHint(lookup, shown, title);
+    shown++;
+
+    // 연번이 비어 있으면 링크 목록의 값으로 채웁니다.
+    // gviz 는 숫자 열로 판단한 칸의 "26-1" 같은 값을 빈칸으로 돌려주는데,
+    // 그러면 연계자료가 서로를 찾지 못합니다.
+    const no = cell(row, "no") || hint?.no || "";
+
+    // 링크 칸이 주소면 그대로, 글자면 링크 목록에서 주소를 찾아 붙입니다.
+    const rawUrl = cell(row, "url");
+    const rawUrlIsAddress = /^https?:\/\//i.test(rawUrl);
+    const url = rawUrlIsAddress ? rawUrl : (hint?.url ?? "");
+    const urlLabel = rawUrlIsAddress ? "" : rawUrl;
+
+    if (rawUrl && !url) {
+      issues.push({ topic, no, column: "자료링크", value: rawUrl });
+    }
     const rawAudience = cell(row, "audience");
     const rawType = cell(row, "type");
     const rawLevel = cell(row, "level");
@@ -216,13 +345,14 @@ export function parseSheet(
       title,
       summary,
       publisher,
-      url: cell(row, "url"),
+      url,
+      urlLabel,
       year,
       yearRank: YEAR_RANK[year] ?? 0,
       user: cell(row, "user"),
       caution: cell(row, "caution"),
       hasLinked: cell(row, "linkedFlag") === "있음",
-      linkedNos: splitMulti(cell(row, "linkedNo")),
+      linkedNos: splitMulti(cell(row, "linkedNo")).flatMap(expandNoRange),
       linkedTarget: cell(row, "linkedTarget"),
       audiences: [...audiences],
       types: [...types],
@@ -272,33 +402,37 @@ export async function fetchAllResources(): Promise<FetchOutcome> {
   const resources: Resource[] = [];
   const issues: SheetIssue[] = [];
 
-  const results = await Promise.all(
-    TOPICS.map(async (topic) => {
-      try {
-        return {
-          topic: topic.key,
-          csv: await getCsv(liveUrl(topic.sheetName)),
-          source: "live" as SourceKind,
-        };
-      } catch {
+  // 시트 4개와 링크 목록을 동시에 받습니다.
+  const [results, hints] = await Promise.all([
+    Promise.all(
+      TOPICS.map(async (topic) => {
         try {
           return {
             topic: topic.key,
-            csv: await getCsv(snapshotUrl(topic.key)),
-            source: "snapshot" as SourceKind,
+            csv: await getCsv(liveUrl(topic.sheetName)),
+            source: "live" as SourceKind,
           };
         } catch {
-          return { topic: topic.key, csv: "", source: "failed" as SourceKind };
+          try {
+            return {
+              topic: topic.key,
+              csv: await getCsv(snapshotUrl(topic.key)),
+              source: "snapshot" as SourceKind,
+            };
+          } catch {
+            return { topic: topic.key, csv: "", source: "failed" as SourceKind };
+          }
         }
-      }
-    }),
-  );
+      }),
+    ),
+    fetchLinkHints(),
+  ]);
 
   for (const r of results) {
     sources[r.topic] = r.source;
     if (!r.csv) continue;
     try {
-      const parsed = parseSheet(r.csv, r.topic);
+      const parsed = parseSheet(r.csv, r.topic, hints[r.topic] ?? []);
       resources.push(...parsed.resources);
       issues.push(...parsed.issues);
     } catch (e) {

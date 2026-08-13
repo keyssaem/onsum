@@ -35,6 +35,13 @@ jobs:
         run: npm run sync:snapshot
         continue-on-error: true
 
+      # 시트 '자료링크' 칸에 글자로 걸린 링크의 실제 주소를 뽑아 둡니다.
+      # CSV 로는 주소가 오지 않아, 이 파일이 없으면 자료 절반 이상이 연결되지 않습니다.
+      # 실패해도 배포는 계속합니다(직전 링크 목록이 그대로 남음).
+      - name: Refresh resource links
+        run: npm run sync:links
+        continue-on-error: true
+
       - name: Build (static export)
         env:
           # 저장소 페이지(아이디.github.io/저장소명)로 배포되므로 basePath가 필요합니다.

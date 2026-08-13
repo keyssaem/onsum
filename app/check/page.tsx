@@ -33,8 +33,19 @@ export default function DataCheckPage() {
         n: r.filter((item) => pick(item).includes(k.key)).length,
       }));
 
+    // 연계자료 연번이 실제로 같은 주제 안의 다른 자료를 가리키는지 확인합니다.
+    // (시트의 연번이 비어 오면 '있음'이라고만 뜨고 이동은 안 되므로 여기서 셉니다)
+    const linkedRows = r.filter((x) => x.hasLinked && x.linkedNos.length > 0);
+    const linkedResolved = linkedRows.filter((x) =>
+      r.some(
+        (y) => y.topic === x.topic && y.id !== x.id && x.linkedNos.includes(y.no),
+      ),
+    ).length;
+
     return {
       total: r.length,
+      linkedRows: linkedRows.length,
+      linkedResolved,
       byTopic: TOPICS.map((t) => ({
         label: t.label,
         n: r.filter((x) => x.topic === t.key).length,
@@ -134,8 +145,20 @@ export default function DataCheckPage() {
             <h2 className="text-lg font-bold">이상 여부</h2>
             <ul className="mt-2 space-y-1 text-sm">
               <li>학교급이 하나도 안 잡힌 자료: {stats.noLevel}건</li>
-              <li>링크가 빈 자료: {stats.noUrl}건</li>
+              <li>
+                자료 주소를 못 찾은 자료: {stats.noUrl}건
+                {stats.noUrl > 0 && (
+                  <span className="text-blossom-500">
+                    {" "}
+                    — 배포 시 <code>npm run sync:links</code> 가 돌았는지 확인
+                  </span>
+                )}
+              </li>
               <li>연계자료 있는 자료: {stats.linked}건</li>
+              <li>
+                연계자료 연번이 실제로 이어진 자료: {stats.linkedResolved} /{" "}
+                {stats.linkedRows}건
+              </li>
               <li>자료활용자 값 종류: {stats.users.join(" / ")}</li>
               <li>
                 매핑 실패한 값:{" "}
